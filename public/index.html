@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servidor MTA:SA - Viseu City</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background-image: url('BANNER.jpg');
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: cover;
+            background-attachment: fixed;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            color: #fff;
+        }
+        .container { 
+            max-width: 800px; 
+            margin: 20px auto;
+            padding: 30px; 
+            background: rgba(42,42,42,0.95);
+            border-radius: 15px; 
+            border: 2px solid rgba(0,255,136,0.4);
+            box-shadow: 0 0 30px rgba(0,0,0,0.6);
+        }
+        h1 { 
+            text-align: center; 
+            color: #00ff88; 
+            text-shadow: 0 0 20px #00ff88;
+            font-size: 2.2em;
+        }
+        .status { 
+            background: rgba(51,51,51,0.95); 
+            padding: 20px; 
+            border-radius: 8px; 
+            margin: 20px 0;
+            border: 1px solid #00ff88;
+        }
+        .connect-btn { 
+            background: linear-gradient(45deg, #00ff88, #00cc66); 
+            color: black; 
+            padding: 15px 30px; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 18px; 
+            cursor: pointer; 
+            width: 100%;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .connect-btn:hover { 
+            background: linear-gradient(45deg, #00cc66, #00aa55);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,255,136,0.5);
+        }
+        #status { font-weight: bold; }
+        #players { list-style: none; padding: 0; }
+        #players li { 
+            background: rgba(68,68,68,0.9); 
+            margin: 5px 0; 
+            padding: 8px; 
+            border-radius: 4px;
+            border-left: 3px solid #00ff88;
+        }
+        section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(0,255,136,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛵 Servidor MTA:SA - Viseu City</h1>
+
+        <section>
+            <h2 style="margin-top:0;">📊 Status do Servidor</h2>
+            <div id="status" class="status">A carregar status do servidor...</div>
+            <ul id="players"></ul>
+            <button class="connect-btn" onclick="connectMTA()">🚀 Conectar ao Servidor</button>
+        </section>
+    </div>
+
+    <script>
+        const SERVER_IP   = '173.212.194.106';
+        const SERVER_PORT = 22003;
+        const API_URL     = 'https://mtasa-status-api.vercel.app/api/status';
+    
+        async function fetchStatus() {
+            const statusEl  = document.getElementById('status');
+            const playersEl = document.getElementById('players');
+    
+            statusEl.innerHTML  = '<strong>🔄 Carregando...</strong>';
+            playersEl.innerHTML = '';
+    
+            try {
+                const res  = await fetch(API_URL);
+                if (!res.ok) throw new Error('API error');
+                const data = await res.json();  // já vem nesse formato que mostraste
+    
+                statusEl.innerHTML = `
+                    <strong style="color:${data.playerCount > 0 ? '#00ff88' : '#ffaa00'};">
+                        ${data.playerCount > 0 ? '🟢 Online' : '🟡 Online (sem jogadores)'}
+                    </strong> | ${data.playerCount}/${data.playerSlots} Jogadores | Mapa: ${data.mapName}<br>
+                    Versão: ${data.version} | Senha: ${data.passworded ? 'Sim' : 'Não'}
+                `;
+    
+                if (Array.isArray(data.players) && data.players.length) {
+                    playersEl.innerHTML = data.players
+                        .map(p => `<li>${p.name} - ${p.ping} ms</li>`)
+                        .join('');
+                } else {
+                    playersEl.innerHTML = '<li>Nenhum jogador online.</li>';
+                }
+            } catch (e) {
+                statusEl.innerHTML = '<strong style="color:#ff6666;">🔴 Offline ou erro ao consultar.</strong>';
+                playersEl.innerHTML = '';
+            }
+        }
+    
+        function connectMTA() {
+            window.location.href = `mtasa://join/${SERVER_IP}:${SERVER_PORT}`;
+        }
+    
+        setInterval(fetchStatus, 30000);
+        fetchStatus();
+    </script>    
+</body>
+</html>
