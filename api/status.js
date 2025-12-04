@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const url = `http://173.212.194.106:22005/serverstatus/status.json`;
+    const url = `http://173.212.194.106:22006/serverstatus/status.json`;
     const r   = await fetch(url);
     if (!r.ok) {
       return res.status(500).json({ error: 'Erro na mtasa-api', code: r.status });
